@@ -1,4 +1,28 @@
+ import React, { useState, useEffect, useMemo } from "react";
+import {
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
+import {
+  RefreshCw,
+  CheckCircle2,
+  AlertCircle,
   Settings,
+  Database,
+  Scale,
+  Calendar,
+  Plus,
+  Layers,
+  Ruler,
+  Trash2, // Añadimos el icono de basura
 } from "lucide-react";
 
 // Data inicial por defecto (si la memoria local y la nube están vacías)
@@ -152,6 +176,21 @@ const S = {
     alignItems: "center",
     gap: "6px",
   },
+  // Estilo nuevo para el botón de borrar integrado en tu paleta
+  btnDelete: {
+    background: "#1c1212",
+    color: "#f87171",
+    border: "1px solid #7f1d1d",
+    padding: "8px 14px",
+    borderRadius: "8px",
+    fontSize: "12px",
+    fontWeight: 600,
+    cursor: "pointer",
+    display: "flex",
+    alignItems: "center",
+    gap: "6px",
+    transition: "background 0.2s",
+  },
   kpiGrid: {
     display: "grid",
     gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))",
@@ -244,7 +283,7 @@ export default function BioTrackCuerpo() {
     if (activeIndex >= history.length) {
       setActiveIndex(Math.max(0, history.length - 1));
     }
-  }, [history]);
+  }, [history, activeIndex]);
 
   useEffect(() => {
     localStorage.setItem("biotrack_sheet_url", sheetUrl);
@@ -256,6 +295,25 @@ export default function BioTrackCuerpo() {
       fetchGoogleSheetsData(sheetUrl);
     }
   }, []);
+
+  // Función Quirúrgica: Eliminar el registro que se está visualizando actualmente
+  const handleBorrarRegistroActivo = () => {
+    if (history.length <= 1) {
+      alert("No puedes eliminar todos los registros. Debe quedar al menos uno.");
+      return;
+    }
+
+    const confirmacion = window.confirm(
+      `¿Seguro que deseas eliminar permanentemente el registro del día ${currentRecord.fecha}?`
+    );
+
+    if (confirmacion) {
+      const nuevoHistorial = history.filter((_, idx) => idx !== activeIndex);
+      setHistory(nuevoHistorial);
+      // Reposicionar el índice activo de forma segura
+      setActiveIndex(Math.max(0, activeIndex - 1));
+    }
+  };
 
   // 2. DETECTOR Y PROCESADOR DE GOOGLE SHEETS EN ESPAÑOL/EUROPA (PARSER RESILIENTE)
   const fetchGoogleSheetsData = async (targetUrl) => {
@@ -279,11 +337,9 @@ export default function BioTrackCuerpo() {
       const lines = text.trim().split(/\r?\n/);
       if (lines.length < 2) throw new Error("Documento vacío o sin formato");
 
-      // AUTO-DETECCIÓN DE SEPARADOR REGIONAL: Compara si tu Excel exporta con ';' o ','
       const firstLine = lines[0];
       const separator = firstLine.includes(";") ? ";" : ",";
 
-      // Normalizar las cabeceras pasándolas a minúsculas
       const headers = firstLine
         .split(separator)
         .map((h) => h.trim().replace(/['"]+/g, "").toLowerCase());
@@ -300,9 +356,8 @@ export default function BioTrackCuerpo() {
         headers.forEach((h, idx) => {
           let val = values[idx];
           if (h === "fecha") {
-            obj[h] = val; // Mantener la fecha intacta
+            obj[h] = val;
           } else if (val) {
-            // Si el separador es europeo ';', reemplaza comas por puntos en los números (ej: 77,8 -> 77.8)
             if (separator === ";") {
               val = val.replace(",", ".");
             }
@@ -312,7 +367,6 @@ export default function BioTrackCuerpo() {
           }
         });
 
-        // Solo procesar la fila si contiene datos indispensables como fecha y peso
         if (obj.fecha && obj.peso) {
           parsedRecords.push({
             fecha: obj.fecha,
@@ -580,7 +634,7 @@ export default function BioTrackCuerpo() {
               <p style={{ fontSize: "12px", color: "#94a3b8", margin: 0 }}>
                 Introduce abajo la URL de tu hoja de cálculo publicada en
                 formato **CSV**. La aplicación auto-detectará si tu Excel está
-                configurado en España y adaptará la separación de celdas
+                configerado en España y adaptará la separación de celdas
                 automáticamente.
               </p>
               <div style={{ display: "flex", gap: "12px", marginTop: "4px" }}>
@@ -606,7 +660,7 @@ export default function BioTrackCuerpo() {
             <div style={S.cardHeader}>
               <div style={S.cardTitle}>
                 <Scale size={16} color="#3b82f6" /> 1. Control Cronológico de
-                Peso y Línea de Tendencia Macroscópica
+                Peso y Línea de Tendencia Macroscópica (Haz clic en los puntos del gráfico para alternar de día)
               </div>
             </div>
             <div
@@ -726,14 +780,24 @@ export default function BioTrackCuerpo() {
               <div style={S.cardHeader}>
                 <div style={S.cardTitle}>
                   <Layers size={16} color="#a78bfa" /> 2. Índices de Composición
-                  Tisular y Compartimentos
+                  Tisular ({currentRecord.fecha || "Sin fecha"})
                 </div>
-                <button
-                  onClick={() => setEditKpiMode(!editKpiMode)}
-                  style={S.btnSecondary}
-                >
-                  {editKpiMode ? "Volver" : "Editar Fila Activa"}
-                </button>
+                <div style={{ display: "flex", gap: "8px" }}>
+                  {/* BOTÓN QUIRÚRGICO DE BORRADO */}
+                  <button
+                    onClick={handleBorrarRegistroActivo}
+                    style={S.btnDelete}
+                    title="Eliminar este registro permanentemente"
+                  >
+                    <Trash2 size={13} /> Borrar Día
+                  </button>
+                  <button
+                    onClick={() => setEditKpiMode(!editKpiMode)}
+                    style={S.btnSecondary}
+                  >
+                    {editKpiMode ? "Volver" : "Editar Fila Activa"}
+                  </button>
+                </div>
               </div>
               {!editKpiMode ? (
                 <div style={S.kpiGrid}>
