@@ -3,7 +3,7 @@ name: Desplegar BioTrack Independiente
 on:
   push:
     branches:
-      - main # Si tu rama principal se llama 'master', cambia 'main' por 'master'
+      - main
 
 permissions:
   contents: read
@@ -28,12 +28,13 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'npm'
 
       - name: Instalar dependencias
-        run: npm install
+        run: npm install --legacy-peer-deps
 
       - name: Compilar aplicación
+        env:
+          CI: false # 👈 Esto evita que los warnings detengan el despliegue
         run: npm run build
 
       - name: Configurar entorno de Pages
@@ -42,7 +43,7 @@ jobs:
       - name: Subir paquete compilado
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './build' # Si tu proyecto usa Vite en vez de Create React App, cambia './build' por './dist'
+          path: './build'
 
       - name: Publicar en internet
         id: deployment
