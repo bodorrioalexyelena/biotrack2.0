@@ -24,22 +24,20 @@ jobs:
       - name: Clonar repositorio
         uses: actions/checkout@v4
 
-      - name: Configurar Node.js (Estable)
+      - name: Configurar Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 18
 
-      - name: Limpiar residuos e Instalar dependencias
+      - name: Instalar dependencias limpias
         run: |
           rm -rf node_modules package-lock.json pnpm-lock.yaml
           npm install --legacy-peer-deps
 
-      - name: Compilar aplicación (Bypass total de advertencias y errores)
+      - name: Compilar aplicacion
         env:
           CI: false
-          TSC_COMPILE_ON_ERROR: true
           DISABLE_ESLINT_PLUGIN: true
-          NODE_OPTIONS: "--max-old-space-size=4096"
         run: npm run build
 
       - name: Configurar entorno de Pages
