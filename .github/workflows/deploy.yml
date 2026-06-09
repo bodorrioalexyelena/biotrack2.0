@@ -24,22 +24,20 @@ jobs:
       - name: Clonar repositorio
         uses: actions/checkout@v4
 
-      - name: Configurar Node.js (Versión 18 estable para react-scripts)
+      - name: Configurar Node.js (Estable)
         uses: actions/setup-node@v4
         with:
           node-version: 18
+          cache: 'npm'
 
-      - name: Limpiar rastros e Instalar dependencias
+      - name: Limpiar residuos e Instalar dependencias de forma limpia
         run: |
-          rm -f pnpm-lock.yaml package-lock.json
-          npm install --legacy-peer-deps
+          rm -rf node_modules package-lock.json pnpm-lock.yaml
+          npm install
 
-      - name: Compilar aplicación (Con bypass de errores y soporte de memoria)
+      - name: Compilar aplicación
         env:
           CI: false
-          TSC_COMPILE_ON_ERROR: true
-          DISABLE_ESLINT_PLUGIN: true
-          NODE_OPTIONS: "--max-old-space-size=4096"
         run: npm run build
 
       - name: Configurar entorno de Pages
