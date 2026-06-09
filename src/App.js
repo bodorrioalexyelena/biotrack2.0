@@ -28,50 +28,6 @@ import {
   Settings,
 } from "lucide-react";
 
-// Data inicial por defecto (si la memoria local y la nube están vacías)
-const DEFAULT_MOCK_DATA = [
-  {
-    fecha: "2026-01-10",
-    peso: 81.5,
-    imc: 25.1,
-    grasa: 18.2,
-    masaGrasa: 14.8,
-    ffm: 66.7,
-    visceral: 7,
-    edadMet: 30,
-    cintura: 86.0,
-    abdominal: 91.0,
-    cadera: 99.0,
-    brazoRel: 36.5,
-    brazoCon: 40.0,
-    piernaIzq: 19.5,
-    piernaDer: 19.4,
-    brazoIzq: 16.0,
-    brazoDer: 15.8,
-    torso: 18.5,
-  },
-  {
-    fecha: "2026-05-30",
-    peso: 77.8,
-    imc: 24.0,
-    grasa: 15.1,
-    masaGrasa: 11.7,
-    ffm: 66.1,
-    visceral: 5,
-    edadMet: 25,
-    cintura: 81.8,
-    abdominal: 85.2,
-    cadera: 95.1,
-    brazoRel: 35.8,
-    brazoCon: 39.4,
-    piernaIzq: 17.2,
-    piernaDer: 17.1,
-    brazoIzq: 13.9,
-    brazoDer: 13.8,
-    torso: 15.2,
-  },
-];
-
 // Estilos de diseño e interfaz profesional de alta densidad
 const S = {
   app: {
