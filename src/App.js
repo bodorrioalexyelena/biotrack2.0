@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
-import './styles.css'; // Vinculado correctamente a tu archivo de estilos
+import './styles.css'; // Volvemos a vincular tu archivo de estilos original
 
-// 1. Registros de ejemplo iniciales
+// Registros de ejemplo iniciales
 const registrosEjemplo = [
   { id: 1, fecha: '2026-05-15', parametro: 'Peso', valor: 76.2 },
   { id: 2, fecha: '2026-05-16', parametro: 'Peso', valor: 76.0 },
@@ -13,56 +13,53 @@ const registrosEjemplo = [
 ];
 
 function App() {
-  // 2. Estado: Inicializa buscando en el navegador; si no hay nada, usa los ejemplos
+  // LÓGICA DE DATOS (Mantenemos la funcionalidad que querías)
   const [registros, setRegistros] = useState(() => {
     const datosGuardados = localStorage.getItem('biotrack_data');
     return datosGuardados ? JSON.parse(datosGuardados) : registrosEjemplo;
   });
 
-  // Estados para controlar lo que escribes en el formulario
   const [fecha, setFecha] = useState('');
   const [parametro, setParametro] = useState('Peso');
   const [valor, setValor] = useState('');
 
-  // 3. Persistencia: Guarda automáticamente en el navegador al añadir o borrar
   useEffect(() => {
     localStorage.setItem('biotrack_data', JSON.stringify(registros));
   }, [registros]);
 
-  // 4. Función para AÑADIR un nuevo registro
   const añadirRegistro = (e) => {
     e.preventDefault();
     if (fecha && parametro && valor && !isNaN(parseFloat(valor))) {
       const nuevoRegistro = {
-        id: Date.now(), // Crea un ID único usando la hora exacta
+        id: Date.now(), 
         fecha: fecha,
         parametro: parametro,
         valor: parseFloat(valor),
       };
       setRegistros(prevRegistros => [...prevRegistros, nuevoRegistro]);
-      setFecha(''); // Limpia el formulario
+      setFecha(''); 
       setValor('');
     } else {
-      alert("Por favor, rellena todos los campos con valores válidos.");
+      alert("Por favor, rellena todos los campos.");
     }
   };
 
-  // 5. Función MAESTRA para BORRAR un registro si te equivocas
   const borrarRegistro = (idParaBorrar) => {
-    // Filtra la lista y conserva solo los que NO tengan el ID que queremos borrar
     const listaActualizada = registros.filter(registro => registro.id !== idParaBorrar);
     setRegistros(listaActualizada);
   };
 
+  // DISEÑO VISUAL (Restaurado para usar las clases de tu styles.css)
   return (
-    <div className="App" style={{ padding: '20px', fontFamily: 'Arial, sans-serif' }}>
-      <h1>BioTrack - Panel de Seguimiento Biométrico</h1>
+    <div className="App"> {/* Usamos tus clases CSS originales */}
+      <h1>BioTrack</h1>
 
-      <div style={{ display: 'flex', gap: '20px', marginBottom: '30px' }}>
-        {/* Gráfico Dinámico */}
-        <div style={{ flex: 1, height: '400px', background: '#f9f9f9', padding: '15px', borderRadius: '8px' }}>
-          <h2>Gráfico de Evolución (Peso)</h2>
-          <ResponsiveContainer width="100%" height="90%">
+      <div className="container"> {/* Volvemos a usar tu estructura de contenedores CSS */}
+        
+        {/* Sección del Gráfico */}
+        <div className="chart-section">
+          <h2>Evolución (Peso)</h2>
+          <ResponsiveContainer width="100%" height={300}>
             <AreaChart
               data={registros.filter(r => r.parametro === 'Peso').sort((a,b) => new Date(a.fecha).getTime() - new Date(b.fecha).getTime())}
               margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
@@ -77,60 +74,46 @@ function App() {
           </ResponsiveContainer>
         </div>
 
-        {/* Formulario de Entrada */}
-        <div style={{ width: '300px', background: '#fefefe', padding: '15px', borderRadius: '8px', border: '1px solid #ddd' }}>
-          <h2>Añadir Registro</h2>
+        {/* Sección del Formulario */}
+        <div className="form-section">
+          <h2>Nuevo Dato</h2>
           <form onSubmit={añadirRegistro}>
-            <div style={{ marginBottom: '10px' }}>
-              <label>Fecha:</label><br />
+            <div className="input-group">
+              <label>Fecha</label>
               <input type="date" value={fecha} onChange={e => setFecha(e.target.value)} required />
             </div>
-            <div style={{ marginBottom: '10px' }}>
-              <label>Parámetro:</label><br />
+            <div className="input-group">
+              <label>Métrica</label>
               <select value={parametro} onChange={e => setParametro(e.target.value)} required>
                 <option value="Peso">Peso (kg)</option>
                 <option value="Horas Sueño">Horas de Sueño</option>
                 <option value="Pasos">Pasos Diarios</option>
               </select>
             </div>
-            <div style={{ marginBottom: '15px' }}>
-              <label>Valor:</label><br />
+            <div className="input-group">
+              <label>Valor</label>
               <input type="number" step="0.1" value={valor} onChange={e => setValor(e.target.value)} required />
             </div>
-            <button type="submit" style={{ width: '100%', padding: '8px', cursor: 'pointer' }}>Añadir</button>
+            <button type="submit" className="btn-add">Añadir</button>
           </form>
         </div>
       </div>
 
-      {/* Historial con opción de eliminar en vivo */}
-      <div style={{ background: '#fdfdfd', padding: '15px', borderRadius: '8px', border: '1px solid #ddd' }}>
-        <h2>Historial de Registros (Haz clic en 🗑️ para eliminar)</h2>
-        <ul style={{ listStyle: 'none', padding: 0 }}>
+      {/* Sección del Historial con botones de borrado */}
+      <div className="history-section">
+        <h2>Registros Guardados</h2>
+        <ul className="history-list">
           {registros.map((registro) => (
-            <li key={registro.id} style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              padding: '10px',
-              borderBottom: '1px solid #eee'
-            }}>
-              <div>
-                <strong>{registro.fecha}</strong>: {registro.parametro} — {registro.valor}
-              </div>
+            <li key={registro.id} className="history-item">
+              <span><strong>{registro.fecha}</strong>: {registro.parametro} — {registro.valor}</span>
               
-              {/* Botón de borrar */}
+              {/* Le ponemos una clase CSS al botón para que lo puedas estilizar */}
               <button
                 onClick={() => borrarRegistro(registro.id)}
-                style={{
-                  padding: '5px 10px',
-                  background: '#ff4d4d',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer'
-                }}
+                className="btn-delete"
+                title="Borrar registro"
               >
-                🗑️ Borrar
+                🗑️
               </button>
             </li>
           ))}
