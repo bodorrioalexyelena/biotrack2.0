@@ -36,8 +36,8 @@ jobs:
           cache: 'pnpm'
 
       - name: Instalar dependencias
-        run: pnpm install --shamefully-hoist # 👈 Esto arregla la estructura para react-scripts
-
+        run: pnpm install --shamefully-hoist --no-frozen-lockfile
+        
       - name: Compilar aplicación
         env:
           CI: false
