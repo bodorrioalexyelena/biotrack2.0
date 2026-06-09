@@ -2,8 +2,6 @@
 import {
   LineChart,
   Line,
-  BarChart,
-  Bar,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -21,8 +19,7 @@ import {
   Calendar,
   Plus,
   Layers,
-  Ruler,
-  Trash2, // Añadimos el icono de basura
+  Trash2,
 } from "lucide-react";
 
 // Data inicial por defecto (si la memoria local y la nube están vacías)
@@ -108,7 +105,6 @@ const S = {
     flexDirection: "column",
     gap: "24px",
   },
-  layoutGrid: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px" },
   card: {
     background: "#0f131f",
     border: "1px solid #171e2e",
@@ -176,7 +172,6 @@ const S = {
     alignItems: "center",
     gap: "6px",
   },
-  // Estilo nuevo para el botón de borrar integrado en tu paleta
   btnDelete: {
     background: "#1c1212",
     color: "#f87171",
@@ -210,35 +205,6 @@ const S = {
   },
   kpiUnit: { fontSize: "11px", color: "#475569", marginLeft: "2px" },
   kpiSub: { fontSize: "10px", color: "#64748b", marginTop: "2px" },
-  anthroLayout: {
-    display: "grid",
-    gridTemplateColumns: "160px 1fr",
-    gap: "24px",
-    alignItems: "center",
-  },
-  silhouetteContainer: {
-    position: "relative",
-    width: "160px",
-    height: "310px",
-    background: "#090b0f",
-    borderRadius: "12px",
-    border: "1px solid #171e2e",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  hotspot: (active) => ({
-    position: "absolute",
-    width: "12px",
-    height: "12px",
-    borderRadius: "50%",
-    background: active ? "#3b82f6" : "#475569",
-    border: "2px solid #090b0f",
-    cursor: "pointer",
-    transform: "translate(-50%, -50%)",
-    transition: "all 0.2s",
-    boxShadow: active ? "0 0 8px #3b82f6" : "none",
-  }),
 };
 
 export default function BioTrackCuerpo() {
@@ -261,7 +227,6 @@ export default function BioTrackCuerpo() {
     new Date().toISOString().split("T")[0]
   );
   const [inputWeight, setInputWeight] = useState("");
-  const [activeZone, setActiveZone] = useState("abdominal");
   const [editKpiMode, setEditKpiMode] = useState(false);
   const [kpiFormValues, setKpiFormValues] = useState({});
 
@@ -461,13 +426,6 @@ export default function BioTrackCuerpo() {
     });
   }, [history]);
 
-  const handleAnthroChange = (zone, value) => {
-    const val = parseFloat(value) || 0;
-    const nextHistory = [...history];
-    nextHistory[activeIndex] = { ...currentRecord, [zone]: val };
-    setHistory(nextHistory);
-  };
-
   const handleUpdateAdvancedMetrics = (e) => {
     e.preventDefault();
     const updated = {
@@ -482,37 +440,6 @@ export default function BioTrackCuerpo() {
     setHistory(nextHistory);
     setEditKpiMode(false);
   };
-
-  const segmentChartData = useMemo(() => {
-    const r = currentRecord;
-    return [
-      {
-        name: "Torso",
-        Porcentaje: r.torso || 0,
-        Masa: +((r.peso || 0) * ((r.torso || 0) / 100)).toFixed(1),
-      },
-      {
-        name: "Brazo Izq.",
-        Porcentaje: r.brazoIzq || 0,
-        Masa: +((r.peso || 0) * ((r.brazoIzq || 0) / 100)).toFixed(1),
-      },
-      {
-        name: "Brazo Der.",
-        Porcentaje: r.brazoDer || 0,
-        Masa: +((r.peso || 0) * ((r.brazoDer || 0) / 100)).toFixed(1),
-      },
-      {
-        name: "Pierna Izq.",
-        Porcentaje: r.piernaIzq || 0,
-        Masa: +((r.peso || 0) * ((r.piernaIzq || 0) / 100)).toFixed(1),
-      },
-      {
-        name: "Pierna Der.",
-        Porcentaje: r.piernaDer || 0,
-        Masa: +((r.peso || 0) * ((r.piernaDer || 0) / 100)).toFixed(1),
-      },
-    ];
-  }, [currentRecord]);
 
   const formatXAxisDate = (str) => {
     if (!str) return "";
@@ -634,7 +561,7 @@ export default function BioTrackCuerpo() {
               <p style={{ fontSize: "12px", color: "#94a3b8", margin: 0 }}>
                 Introduce abajo la URL de tu hoja de cálculo publicada en
                 formato **CSV**. La aplicación auto-detectará si tu Excel está
-                configerado en España y adaptará la separación de celdas
+                configurado en España y adaptará la separación de celdas
                 automáticamente.
               </p>
               <div style={{ display: "flex", gap: "12px", marginTop: "4px" }}>
@@ -774,289 +701,133 @@ export default function BioTrackCuerpo() {
             </div>
           </div>
 
-          <div style={S.layoutGrid}>
-            {/* 2. PANEL COMPOSICIÓN TISULAR */}
-            <div style={S.card}>
-              <div style={S.cardHeader}>
-                <div style={S.cardTitle}>
-                  <Layers size={16} color="#a78bfa" /> 2. Índices de Composición
-                  Tisular ({currentRecord.fecha || "Sin fecha"})
-                </div>
-                <div style={{ display: "flex", gap: "8px" }}>
-                  {/* BOTÓN QUIRÚRGICO DE BORRADO */}
-                  <button
-                    onClick={handleBorrarRegistroActivo}
-                    style={S.btnDelete}
-                    title="Eliminar este registro permanentemente"
-                  >
-                    <Trash2 size={13} /> Borrar Día
-                  </button>
-                  <button
-                    onClick={() => setEditKpiMode(!editKpiMode)}
-                    style={S.btnSecondary}
-                  >
-                    {editKpiMode ? "Volver" : "Editar Fila Activa"}
-                  </button>
-                </div>
+          {/* 2. PANEL COMPOSICIÓN TISULAR */}
+          <div style={S.card}>
+            <div style={S.cardHeader}>
+              <div style={S.cardTitle}>
+                <Layers size={16} color="#a78bfa" /> 2. Índices de Composición
+                Tisular ({currentRecord.fecha || "Sin fecha"})
               </div>
-              {!editKpiMode ? (
-                <div style={S.kpiGrid}>
-                  {[
-                    {
-                      id: "imc",
-                      name: "IMC",
-                      val: currentRecord.imc || 0,
-                      unit: "",
-                      sub: "Estructura IMC",
-                    },
-                    {
-                      id: "grasa",
-                      name: "Grasa Corporal",
-                      val: currentRecord.grasa || 0,
-                      unit: "%",
-                      sub: getFatRange(currentRecord.grasa || 0),
-                    },
-                    {
-                      id: "masaGrasa",
-                      name: "Masa Grasa",
-                      val: currentRecord.masaGrasa || 0,
-                      unit: "kg",
-                      sub: "Tejido Adiposo",
-                    },
-                    {
-                      id: "ffm",
-                      name: "Masa Libre de Grasa",
-                      val: currentRecord.ffm || 0,
-                      unit: "kg",
-                      sub: "Masa Magra",
-                    },
-                    {
-                      id: "visceral",
-                      name: "Grasa Visceral",
-                      val: currentRecord.visceral || 0,
-                      unit: "lvl",
-                      sub: "Área Core",
-                    },
-                    {
-                      id: "edadMet",
-                      name: "Edad Metabólica",
-                      val: currentRecord.edadMet || 0,
-                      unit: "años",
-                      sub: "Biomarcador",
-                    },
-                  ].map((kpi) => (
-                    <div key={kpi.id} style={S.kpiItem}>
-                      <div style={S.label}>{kpi.name}</div>
-                      <div style={S.kpiVal}>
-                        {kpi.val}
-                        <span style={S.kpiUnit}>{kpi.unit}</span>
-                      </div>
-                      <div style={S.kpiSub}>{kpi.sub}</div>
+              <div style={{ display: "flex", gap: "8px" }}>
+                {/* BOTÓN DE BORRADO REGISTRO ACTIVO */}
+                <button
+                  onClick={handleBorrarRegistroActivo}
+                  style={S.btnDelete}
+                  title="Eliminar este registro permanentemente"
+                >
+                  <Trash2 size={13} /> Borrar Día
+                </button>
+                <button
+                  onClick={() => setEditKpiMode(!editKpiMode)}
+                  style={S.btnSecondary}
+                >
+                  {editKpiMode ? "Volver" : "Editar Fila Activa"}
+                </button>
+              </div>
+            </div>
+            {!editKpiMode ? (
+              <div style={S.kpiGrid}>
+                {[
+                  {
+                    id: "imc",
+                    name: "IMC",
+                    val: currentRecord.imc || 0,
+                    unit: "",
+                    sub: "Estructura IMC",
+                  },
+                  {
+                    id: "grasa",
+                    name: "Grasa Corporal",
+                    val: currentRecord.grasa || 0,
+                    unit: "%",
+                    sub: getFatRange(currentRecord.grasa || 0),
+                  },
+                  {
+                    id: "masaGrasa",
+                    name: "Masa Grasa",
+                    val: currentRecord.masaGrasa || 0,
+                    unit: "kg",
+                    sub: "Tejido Adiposo",
+                  },
+                  {
+                    id: "ffm",
+                    name: "Masa Libre de Grasa",
+                    val: currentRecord.ffm || 0,
+                    unit: "kg",
+                    sub: "Masa Magra",
+                  },
+                  {
+                    id: "visceral",
+                    name: "Grasa Visceral",
+                    val: currentRecord.visceral || 0,
+                    unit: "lvl",
+                    sub: "Área Core",
+                  },
+                  {
+                    id: "edadMet",
+                    name: "Edad Metabólica",
+                    val: currentRecord.edadMet || 0,
+                    unit: "años",
+                    sub: "Biomarcador",
+                  },
+                ].map((kpi) => (
+                  <div key={kpi.id} style={S.kpiItem}>
+                    <div style={S.label}>{kpi.name}</div>
+                    <div style={S.kpiVal}>
+                      {kpi.val}
+                      <span style={S.kpiUnit}>{kpi.unit}</span>
+                    </div>
+                    <div style={S.kpiSub}>{kpi.sub}</div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <form
+                onSubmit={handleUpdateAdvancedMetrics}
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "12px",
+                  background: "#090b0f",
+                  padding: "14px",
+                  borderRadius: "10px",
+                }}
+              >
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "1fr 1fr",
+                    gap: "10px",
+                  }}
+                >
+                  {["imc", "grasa", "visceral", "edadMet"].map((field) => (
+                    <div key={field} style={S.formGroup}>
+                      <label style={S.label}>{field}</label>
+                      <input
+                        type="number"
+                        step="0.1"
+                        value={kpiFormValues[field] || ""}
+                        onChange={(e) =>
+                          setKpiFormValues({
+                            ...kpiFormValues,
+                            [field]: e.target.value,
+                          })
+                        }
+                        style={S.input}
+                      />
                     </div>
                   ))}
                 </div>
-              ) : (
-                <form
-                  onSubmit={handleUpdateAdvancedMetrics}
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "12px",
-                    background: "#090b0f",
-                    padding: "14px",
-                    borderRadius: "10px",
-                  }}
+                <button
+                  type="submit"
+                  style={{ ...S.btnPrimary, alignSelf: "flex-end" }}
                 >
-                  <div
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: "1fr 1fr",
-                      gap: "10px",
-                    }}
-                  >
-                    {["imc", "grasa", "visceral", "edadMet"].map((field) => (
-                      <div key={field} style={S.formGroup}>
-                        <label style={S.label}>{field}</label>
-                        <input
-                          type="number"
-                          step="0.1"
-                          value={kpiFormValues[field] || ""}
-                          onChange={(e) =>
-                            setKpiFormValues({
-                              ...kpiFormValues,
-                              [field]: e.target.value,
-                            })
-                          }
-                          style={S.input}
-                        />
-                      </div>
-                    ))}
-                  </div>
-                  <button
-                    type="submit"
-                    style={{ ...S.btnPrimary, alignSelf: "flex-end" }}
-                  >
-                    Guardar Cambios Fila
-                  </button>
-                </form>
-              )}
-            </div>
-
-            {/* 3. DIAGRAMA ANTROPOMÉTRICO */}
-            <div style={S.card}>
-              <div style={S.cardHeader}>
-                <div style={S.cardTitle}>
-                  <Ruler size={16} color="#fbbf24" /> 3. Mapeo Perimetral
-                  Localizado y Segmentación de Grasa
-                </div>
-              </div>
-              <div style={S.anthroLayout}>
-                <div style={S.silhouetteContainer}>
-                  <svg
-                    width="110"
-                    height="280"
-                    viewBox="0 0 100 240"
-                    style={{ opacity: 0.25 }}
-                  >
-                    <circle cx="50" cy="22" r="14" fill="#64748b" />
-                    <path
-                      d="M35,40 L65,40 L70,110 L64,110 L60,230 L40,230 L36,110 L30,110 Z"
-                      fill="#64748b"
-                    />
-                  </svg>
-                  <div
-                    style={{
-                      ...S.hotspot(activeZone === "brazoRel"),
-                      top: "22%",
-                      left: "20%",
-                    }}
-                    onClick={() => setActiveZone("brazoRel")}
-                  />
-                  <div
-                    style={{
-                      ...S.hotspot(activeZone === "cintura"),
-                      top: "36%",
-                      left: "50%",
-                    }}
-                    onClick={() => setActiveZone("cintura")}
-                  />
-                  <div
-                    style={{
-                      ...S.hotspot(activeZone === "abdominal"),
-                      top: "43%",
-                      left: "50%",
-                    }}
-                    onClick={() => setActiveZone("abdominal")}
-                  />
-                  <div
-                    style={{
-                      ...S.hotspot(activeZone === "cadera"),
-                      top: "52%",
-                      left: "50%",
-                    }}
-                    onClick={() => setActiveZone("cadera")}
-                  />
-                </div>
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "12px",
-                  }}
-                >
-                  <div
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: "1fr 1fr",
-                      gap: "8px",
-                    }}
-                  >
-                    {[
-                      "cintura",
-                      "abdominal",
-                      "cadera",
-                      "brazoRel",
-                      "brazoCon",
-                    ].map((zone) => (
-                      <div
-                        key={zone}
-                        style={{
-                          background:
-                            activeZone === zone ? "#131c31" : "#090b0f",
-                          border:
-                            activeZone === zone
-                              ? "1px solid #3b82f6"
-                              : "1px solid #171e2e",
-                          padding: "8px 10px",
-                          borderRadius: "8px",
-                          cursor: "pointer",
-                        }}
-                        onClick={() => setActiveZone(zone)}
-                      >
-                        <div
-                          style={{
-                            fontSize: "10px",
-                            color: activeZone === zone ? "#60a5fa" : "#64748b",
-                          }}
-                        >
-                          {zone.toUpperCase()}
-                        </div>
-                        <input
-                          type="number"
-                          step="0.1"
-                          value={currentRecord[zone] || 0}
-                          onChange={(e) =>
-                            handleAnthroChange(zone, e.target.value)
-                          }
-                          style={{
-                            background: "transparent",
-                            border: "none",
-                            color: "#f1f5f9",
-                            fontSize: "14px",
-                            fontWeight: 700,
-                            width: "100%",
-                            outline: "none",
-                          }}
-                        />
-                      </div>
-                    ))}
-                  </div>
-                  <ResponsiveContainer width="100%" height={115}>
-                    <BarChart
-                      data={segmentChartData}
-                      layout="vertical"
-                      margin={{ left: -20 }}
-                    >
-                      <XAxis
-                        type="number"
-                        tick={{ fill: "#475569", fontSize: 9 }}
-                      />
-                      <YAxis
-                        dataKey="name"
-                        type="category"
-                        tick={{ fill: "#94a3b8", fontSize: 10 }}
-                      />
-                      <Tooltip />
-                      <Bar
-                        dataKey="Porcentaje"
-                        fill="#3b82f6"
-                        radius={[0, 4, 4, 0]}
-                        barSize={8}
-                        name="% Grasa"
-                      />
-                      <Bar
-                        dataKey="Masa"
-                        fill="#f43f5e"
-                        radius={[0, 4, 4, 0]}
-                        barSize={8}
-                        name="Masa (kg)"
-                      />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
-            </div>
+                  Guardar Cambios Fila
+                </button>
+              </form>
+            )}
           </div>
+
         </div>
       </div>
     </div>
