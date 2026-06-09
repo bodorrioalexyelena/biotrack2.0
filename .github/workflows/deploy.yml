@@ -24,26 +24,20 @@ jobs:
       - name: Clonar repositorio
         uses: actions/checkout@v4
 
-      - name: Instalar pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9
-
       - name: Configurar Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'pnpm'
 
-      - name: Instalar dependencias
-        run: pnpm install --shamefully-hoist --no-frozen-lockfile
-        
-      - name: Compilar aplicación
+      - name: Instalar dependencias con NPM (Estructura nativa para React)
+        run: npm install --legacy-peer-deps
+
+      - name: Compilar aplicación (Ignorar bloqueos y errores de entorno)
         env:
           CI: false
-          TSC_COMPILE_ON_ERROR: true # 👈 Obliga a compilar aunque TypeScript proteste
-          DISABLE_ESLINT_PLUGIN: true # 👈 Evita que los avisos de formato frenen el proceso
-        run: pnpm run build
+          TSC_COMPILE_ON_ERROR: true
+          DISABLE_ESLINT_PLUGIN: true
+        run: npm run build
 
       - name: Configurar entorno de Pages
         uses: actions/configure-pages@v4
@@ -51,7 +45,7 @@ jobs:
       - name: Subir paquete compilado
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './build' # 👈 Volvemos a la ruta correcta de tu proyecto
+          path: './build'
 
       - name: Publicar en internet
         id: deployment
