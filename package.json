@@ -2,8 +2,6 @@
   "homepage": "https://bodorrioalexyelena.github.io/biotrack2.0",
   "name": "biotrack-pro",
   "version": "0.1.0",
-  "name": "react",
-  "version": "1.0.0",
   "description": "",
   "keywords": [],
   "main": "src/index.tsx",
