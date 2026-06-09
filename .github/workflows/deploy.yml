@@ -24,19 +24,22 @@ jobs:
       - name: Clonar repositorio
         uses: actions/checkout@v4
 
-      - name: Configurar Node.js
+      - name: Configurar Node.js (Versión 18 estable para react-scripts)
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 18
 
-      - name: Instalar dependencias con NPM (Estructura nativa para React)
-        run: npm install --legacy-peer-deps
+      - name: Limpiar rastros e Instalar dependencias
+        run: |
+          rm -f pnpm-lock.yaml package-lock.json
+          npm install --legacy-peer-deps
 
-      - name: Compilar aplicación (Ignorar bloqueos y errores de entorno)
+      - name: Compilar aplicación (Con bypass de errores y soporte de memoria)
         env:
           CI: false
           TSC_COMPILE_ON_ERROR: true
           DISABLE_ESLINT_PLUGIN: true
+          NODE_OPTIONS: "--max-old-space-size=4096"
         run: npm run build
 
       - name: Configurar entorno de Pages
